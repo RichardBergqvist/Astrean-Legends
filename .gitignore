@@ -1,6 +1,13 @@
 /.metadata/
 
 /.recommenders/
-AstreanLegends/.classpath
-AstreanLegends/.project
-AstreanLegends/.settings/
+Astrean Legends/.classpath
+Astrean Legends/.project
+Astrean Legends/.settings/
+Astrean Legends(Old)/.gitignore
+Astrean Legends(Old)/.classpath
+Astrean Legends(Old)/.project
+Astrean Legends(Old)/.settings/
+Astrean Legends(Old)/src/
+Astrean Legends(Old)/resources/
+lib/
