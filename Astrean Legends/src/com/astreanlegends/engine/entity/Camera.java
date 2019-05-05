@@ -5,7 +5,15 @@ import org.lwjgl.util.vector.Vector3f;
 
 public class Camera {
 
-	private float distanceFromPlayer = 35;
+	private final float MINIMUM_DISTANCE_FROM_PLAYER = 30;
+	private final float MAXIMUM_DISTANCE_FROM_PLAYER = 100;
+	private final float MINIMUM_PITCH_3RD = 10;
+	private final float MAXIMUM_PITCH_3RD = 90;
+	private final float MINIMUM_PITCH_1ST = -90;
+	private final float MAXIMUM_PITCH_1ST = 90;
+	private final float MAXIMUM_ANGLE_AROUND_PLAYER = 140;
+	
+	private float distanceFromPlayer = 40;
 	private float angleAroundPlayer = 0;
 	
 	private Vector3f position = new Vector3f(0, 0, 0);
@@ -38,6 +46,10 @@ public class Camera {
 		if(!player.isFirstPerson()) {
 			float zoomLevel = Mouse.getDWheel() * 0.1F;
 			distanceFromPlayer -= zoomLevel;
+			if(distanceFromPlayer <= MINIMUM_DISTANCE_FROM_PLAYER)
+				distanceFromPlayer = (MINIMUM_DISTANCE_FROM_PLAYER - 1);
+			if(distanceFromPlayer >= MAXIMUM_DISTANCE_FROM_PLAYER)
+				distanceFromPlayer = (MAXIMUM_DISTANCE_FROM_PLAYER - 1);
 		}
 	}
 	
@@ -45,6 +57,17 @@ public class Camera {
 		if(Mouse.isButtonDown(1)) {
 			float pitchChange = Mouse.getDY() * 0.1F;
 			pitch -= pitchChange;
+			if(!player.isFirstPerson()) {
+				if(pitch <= MINIMUM_PITCH_3RD)
+					pitch = MINIMUM_PITCH_3RD;
+				if(pitch >= MAXIMUM_PITCH_3RD)
+					pitch = MAXIMUM_PITCH_3RD;
+			} else {
+				if(pitch <= MINIMUM_PITCH_1ST)
+					pitch = MINIMUM_PITCH_1ST;
+				if(pitch >= MAXIMUM_PITCH_1ST)
+					pitch = MAXIMUM_PITCH_1ST;
+			}
 		}
 	}
 	
@@ -52,6 +75,12 @@ public class Camera {
 		if(Mouse.isButtonDown(0)) {
 			float angleChange = Mouse.getDX() * 0.1F;
 			angleAroundPlayer -= angleChange;
+			if(player.isFirstPerson()) {
+				if(angleAroundPlayer >= MAXIMUM_ANGLE_AROUND_PLAYER)
+					angleAroundPlayer = MAXIMUM_ANGLE_AROUND_PLAYER;
+				if(angleAroundPlayer <= -MAXIMUM_ANGLE_AROUND_PLAYER)
+					angleAroundPlayer = -MAXIMUM_ANGLE_AROUND_PLAYER;
+			}
 		}
 	}
 	
