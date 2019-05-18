@@ -12,8 +12,7 @@ import com.astreanlegends.engine.utility.Maths;
 
 public class TerrainShader extends Shader {
 
-	private static final String VERTEX_SHADER_FILE = "res/shaders/terrainVertexShader.vert";
-	private static final String FRAGMENT_SHADER_FILE = "res/shaders/terrainFragmentShader.frag";
+	private static final String SHADER_FILE = "res/shaders/terrainShader";
 	
 	private static final int MAXIMUM_LIGHTS = 4;
 	
@@ -34,7 +33,7 @@ public class TerrainShader extends Shader {
 	private int location_blendMap;
 	
 	public TerrainShader() {
-		super(VERTEX_SHADER_FILE, FRAGMENT_SHADER_FILE);
+		super(SHADER_FILE);
 	}
 	
 	@Override

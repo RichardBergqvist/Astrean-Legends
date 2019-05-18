@@ -49,8 +49,4 @@ public class GuiRenderer {
 		Matrix4f transformationMatrix = Maths.createTransformationMatrix(gui.getPosition(), gui.getScale());
 		shader.loadTransformationMatrix(transformationMatrix);
 	}
-	
-	public void clean() {
-		shader.clean();
-	}
 }

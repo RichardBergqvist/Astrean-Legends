@@ -13,8 +13,7 @@ import com.astreanlegends.engine.utility.Maths;
 
 public class NormalMapShader extends Shader {
 
-	private static final String VERTEX_SHADER_FILE = "res/shaders/normalMapVertexShader.vert";
-	private static final String FRAGMENT_SHADER_FILE = "res/shaders/normalMapFragmentShader.frag";
+	private static final String SHADER_FILE = "res/shaders/normalMapShader";
 	
 	private static final int MAXIMUM_LIGHTS = 4;
 	
@@ -34,7 +33,7 @@ public class NormalMapShader extends Shader {
 	private int location_offset;
 	
 	public NormalMapShader() {
-		super(VERTEX_SHADER_FILE, FRAGMENT_SHADER_FILE);
+		super(SHADER_FILE);
 	}
 	
 	@Override

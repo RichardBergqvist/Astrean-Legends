@@ -1,5 +1,6 @@
 package com.astreanlegends.engine.graphics;
 
+import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL14.*;
@@ -7,6 +8,7 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.util.WaveData;
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 
@@ -32,6 +35,7 @@ public class ResourceLoader {
 	private List<Integer> vaos = new ArrayList<Integer>();
 	private List<Integer> vbos = new ArrayList<Integer>();
 	private List<Integer> textures = new ArrayList<Integer>();
+	private static List<Integer> buffers = new ArrayList<Integer>();
 	
 	public Model loadModelFromData(ModelData data) {
 		return loadToVAO(data.getVertices(), data.getIndices(), data.getTextureCoordinates(), data.getNormals(), data.getTangents());
@@ -42,6 +46,14 @@ public class ResourceLoader {
 		storeDataInAttributeList(0, dimensions, positions);
 		unbindVAO();
 		return new Model(vaoID, positions.length / dimensions);
+	}
+	
+	public int loadToVAO(float[] positions, float[] textureCoordinates) {
+		int vaoID = createVAO();
+		storeDataInAttributeList(0, 2, positions);
+		storeDataInAttributeList(1, 2, textureCoordinates);
+		unbindVAO();
+		return vaoID;
 	}
 	
 	public Model loadToVAO(float[] positions, int[] indices, float[] textureCoordinates, float[] normals) {
@@ -70,8 +82,26 @@ public class ResourceLoader {
 		try {
 			texture = TextureLoader.getTexture("PNG", new FileInputStream("res/textures/" + fileName + ".png"));
 			glGenerateMipmap(GL_TEXTURE_2D);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4F);
+		} catch (FileNotFoundException exception) {
+			exception.printStackTrace();
+			System.err.println("Could not find texture file: " + fileName);
+		} catch (IOException exception) {
+			exception.printStackTrace();
+		}
+		int textureID = texture.getTextureID();
+		textures.add(textureID);
+		return textureID;
+	}
+	
+	public int loadFontTexture(String fileName) {
+		Texture texture = null;
+		try {
+			texture = TextureLoader.getTexture("PNG", new FileInputStream("res/textures/fonts/" + fileName + ".png"));
+			glGenerateMipmap(GL_TEXTURE_2D);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, 0);
 		} catch (FileNotFoundException exception) {
 			exception.printStackTrace();
 			System.err.println("Could not find texture file: " + fileName);
@@ -118,6 +148,22 @@ public class ResourceLoader {
 		return textureID;
 	}
 	
+	public int loadSound(String fileName) {
+		int bufferID = alGenBuffers(); 
+		try {
+			FileInputStream in = new FileInputStream("res/sounds/" + fileName);
+			BufferedInputStream bin = new BufferedInputStream(in);
+			buffers.add(bufferID);
+			WaveData waveFile = WaveData.create(bin);
+			alBufferData(bufferID, waveFile.format, waveFile.data, waveFile.samplerate);
+			waveFile.dispose();
+			in.close();
+		} catch (Exception exception) {
+			System.err.println("Could not find sound file: " + fileName);
+			exception.printStackTrace();
+		}
+		return bufferID;
+	}
 	
 	public void clean() {
 		for(int vao : vaos)
@@ -126,6 +172,8 @@ public class ResourceLoader {
 			glDeleteBuffers(vbo);
 		for(int texture : textures)
 			glDeleteTextures(texture);
+		for(int buffer : buffers)
+			alDeleteBuffers(buffer);
 	}
 	
 	private int createVAO() {

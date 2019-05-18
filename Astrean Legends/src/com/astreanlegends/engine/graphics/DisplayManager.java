@@ -13,7 +13,7 @@ public class DisplayManager {
 
 	private static final int WIDTH = 1280;
 	private static final int HEIGHT = 720;
-	private static final String TITLE = "Astrean Legends | In-Development 1.0";
+	public static final String TITLE = "Astrean Legends | In-Development 1.0";
 	
 	private static final int FPS_CAP = 200;
 	

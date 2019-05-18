@@ -13,8 +13,7 @@ import com.astreanlegends.engine.utility.Maths;
 
 public class EntityShader extends Shader {
 
-	private static final String VERTEX_SHADER_FILE = "res/shaders/vertexShader.vert";
-	private static final String FRAGMENT_SHADER_FILE = "res/shaders/fragmentShader.frag";
+	private static final String SHADER_FILE = "res/shaders/entityShader";
 	
 	private static final int MAXIMUM_LIGHTS = 4;
 	
@@ -33,7 +32,7 @@ public class EntityShader extends Shader {
 	private int location_offset;
 	
 	public EntityShader() {
-		super(VERTEX_SHADER_FILE, FRAGMENT_SHADER_FILE);
+		super(SHADER_FILE);
 	}
 	
 	@Override

@@ -9,8 +9,7 @@ import com.astreanlegends.engine.utility.Maths;
 
 public class SkyboxShader extends Shader {
 
-	private static final String VERTEX_SHADER_FILE = "res/shaders/skyboxVertexShader.vert";
-	private static final String FRAGMENT_SHADER_FILE = "res/shaders/skyboxFragmentShader.frag";
+	private static final String SHADER_FILE = "res/shaders/skyboxShader";
 	
 	private static final float ROTATION_SPEED = 1F;
 	
@@ -24,7 +23,7 @@ public class SkyboxShader extends Shader {
 	private int location_fogColor;
 	
 	public SkyboxShader() {
-		super(VERTEX_SHADER_FILE, FRAGMENT_SHADER_FILE);
+		super(SHADER_FILE);
 	}
 	
 	@Override

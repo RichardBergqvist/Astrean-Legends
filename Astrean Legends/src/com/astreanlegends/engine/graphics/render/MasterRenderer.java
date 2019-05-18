@@ -1,6 +1,7 @@
 package com.astreanlegends.engine.graphics.render;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,9 +15,12 @@ import org.lwjgl.util.vector.Vector4f;
 import com.astreanlegends.engine.entity.Camera;
 import com.astreanlegends.engine.entity.Entity;
 import com.astreanlegends.engine.graphics.ResourceLoader;
+import com.astreanlegends.engine.graphics.font.Font;
+import com.astreanlegends.engine.graphics.gui.GuiText;
 import com.astreanlegends.engine.graphics.lighting.Light;
 import com.astreanlegends.engine.graphics.model.TexturedModel;
 import com.astreanlegends.engine.graphics.shader.EntityShader;
+import com.astreanlegends.engine.graphics.shader.FontShader;
 import com.astreanlegends.engine.graphics.shader.GuiShader;
 import com.astreanlegends.engine.graphics.shader.NormalMapShader;
 import com.astreanlegends.engine.graphics.shader.SkyboxShader;
@@ -57,11 +61,15 @@ public class MasterRenderer {
 	private GuiShader guiShader = new GuiShader();
 	private GuiRenderer guiRenderer;
 	
+	private FontShader fontShader = new FontShader();
+	private FontRenderer fontRenderer;
+	
 	private List<Terrain> terrains = new ArrayList<Terrain>();
 	private Map<TexturedModel, List<Entity>> entities = new HashMap<TexturedModel, List<Entity>>();
 	private Map<TexturedModel, List<Entity>> normalMapEntities = new HashMap<TexturedModel, List<Entity>>();
 	private List<WaterTile> waters = new ArrayList<WaterTile>();
 	private List<GuiTexture> guis = new ArrayList<GuiTexture>();
+	private Map<Font, List<GuiText>> texts = new HashMap<Font, List<GuiText>>();
 	
 	public MasterRenderer(ResourceLoader loader, Light sun, WaterFramebuffers buffers) {
 		System.out.println(getOpenGLVersion());
@@ -73,6 +81,7 @@ public class MasterRenderer {
 		waterRenderer = new WaterRenderer(waterShader, loader, projectionMatrix, buffers, sun);
 		skyboxRenderer = new SkyboxRenderer(skyboxShader, loader, projectionMatrix);
 		guiRenderer = new GuiRenderer(guiShader, loader);
+		fontRenderer = new FontRenderer(fontShader, loader);
 	}
 	
 	public void init() {
@@ -81,24 +90,23 @@ public class MasterRenderer {
 		glClearColor(RED, GREEN, BLUE, 1);
 	}
 	
-	public void render(List<Terrain> terrains, List<Entity> entities, List<Entity> normalMapEntities, List<GuiTexture> guis, List<Light> lights, Camera camera, Vector4f clipPlane) {
+	public void render(List<Terrain> terrains, List<Entity> entities, List<Entity> normalMapEntities, List<Light> lights, Camera camera, Vector4f clipPlane) {
 		for(Terrain terrain : terrains)
 			addTerrain(terrain);
 		for(Entity entity : entities)
 			addEntity(entity);
 		for(Entity normalMapEntity : normalMapEntities)
 			addNormalMapEntity(normalMapEntity);
-		for(GuiTexture gui : guis)
-			addGUI(gui);
 		render(lights, camera, clipPlane);
 	}
 	
-	public void postRender(List<WaterTile> waters, Camera camera) {
-		for (WaterTile water : waters)
-			addWater(water);
-		postRenderI(waters, camera);
+	public void postRender(List<GuiTexture> guis, List<GuiText> texts) {
+		for(GuiTexture gui : guis)
+			addGUI(gui);
+		for(GuiText text : texts)
+			addText(text);
+		postRender();
 	}
-	
 	
 	public void render(List<Light> lights, Camera camera, Vector4f clipPlane) {
 		init();
@@ -128,18 +136,34 @@ public class MasterRenderer {
 		skyboxShader.loadFogColor(RED, GREEN, BLUE);
 		skyboxRenderer.render();
 		skyboxShader.stop();
-		guiShader.start();
-		guiRenderer.render(guis);
-		guiShader.stop();
 		
 		terrains.clear();
 		entities.clear();
 		normalMapEntities.clear();
 		waters.clear();
-		guis.clear();
 	}
 	
-	public void postRenderI(List<WaterTile> waters, Camera camera) {
+	public void postRender(List<WaterTile> waters, Camera camera) {
+		for (WaterTile water : waters)
+			addWater(water);
+		postRenderWater(waters, camera);
+	}
+	
+	public void postRender() {
+		glDisable(GL_CLIP_DISTANCE0);
+		guiShader.start();
+		guiRenderer.render(guis);
+		guiShader.stop();
+		fontShader.start();
+		fontRenderer.render(texts);
+		fontShader.stop();
+		glEnable(GL_CLIP_DISTANCE0);
+		
+		guis.clear();
+		texts.clear();
+	}
+	
+	public void postRenderWater(List<WaterTile> waters, Camera camera) {
 		waterShader.start();
 		waterShader.loadViewMatrix(camera);
 		waterRenderer.render(waters);
@@ -182,6 +206,18 @@ public class MasterRenderer {
 		guis.add(gui);
 	}
 	
+	public void addText(GuiText text) {
+		Font font = text.getFont();
+		List<GuiText> batch = texts.get(font);
+		if(batch != null)
+			batch.add(text);
+		else {
+			List<GuiText> newBatch = new ArrayList<GuiText>();
+			newBatch.add(text);
+			texts.put(font, newBatch);
+		}
+	}
+	
 	public void clean() {
 		terrainShader.clean();
 		entityShader.clean();
@@ -189,6 +225,8 @@ public class MasterRenderer {
 		waterShader.clean();
 		skyboxShader.clean();
 		guiShader.clean();
+		fontShader.clean();
+		fontRenderer.clean();
 	}
 	
 	private void createProjectionMatrix() {

@@ -22,9 +22,9 @@ public abstract class Shader {
 	
 	private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 	
-	public Shader(String vertexShaderFileName, String fragmentShaderFileName) {
-		vertexShaderID = loadShader(vertexShaderFileName, GL_VERTEX_SHADER);
-		fragmentShaderID = loadShader(fragmentShaderFileName, GL_FRAGMENT_SHADER);
+	public Shader(String shaderName) {
+		vertexShaderID = loadShader(shaderName+".vert", GL_VERTEX_SHADER);
+		fragmentShaderID = loadShader(shaderName+".frag", GL_FRAGMENT_SHADER);
 		programID = glCreateProgram();
 		glAttachShader(programID, vertexShaderID);
 		glAttachShader(programID, fragmentShaderID);

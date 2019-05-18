@@ -8,8 +8,7 @@ import com.astreanlegends.engine.utility.Maths;
 
 public class WaterShader extends Shader {
 
-	private static final String VERTEX_SHADER_FILE = "res/shaders/waterVertexShader.vert";
-	private static final String FRAGMENT_SHADER_FILE = "res/shaders/waterFragmentShader.frag";
+	private static final String SHADER_FILE = "res/shaders/waterShader";
 	
 	private int location_transformationMatrix;
 	private int location_projectionMatrix;
@@ -25,7 +24,7 @@ public class WaterShader extends Shader {
 	private int location_moveFactor;
 	
 	public WaterShader() {
-		super(VERTEX_SHADER_FILE, FRAGMENT_SHADER_FILE);
+		super(SHADER_FILE);
 	}
 	
 	@Override

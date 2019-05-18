@@ -1,14 +1,15 @@
 package com.astreanlegends.engine;
 
-import static org.lwjgl.opengl.GL11.glDisable;
-import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL30.GL_CLIP_DISTANCE0;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 
@@ -18,6 +19,9 @@ import com.astreanlegends.engine.entity.Player;
 import com.astreanlegends.engine.graphics.DisplayManager;
 import com.astreanlegends.engine.graphics.OBJFileLoader;
 import com.astreanlegends.engine.graphics.ResourceLoader;
+import com.astreanlegends.engine.graphics.font.Font;
+import com.astreanlegends.engine.graphics.font.FontProperties;
+import com.astreanlegends.engine.graphics.gui.GuiText;
 import com.astreanlegends.engine.graphics.lighting.Light;
 import com.astreanlegends.engine.graphics.model.Model;
 import com.astreanlegends.engine.graphics.model.ModelData;
@@ -43,6 +47,7 @@ public class MainGameLoop {
 		List<Entity> normalMapEntities = new ArrayList<Entity>();
 		List<WaterTile> waters = new ArrayList<WaterTile>();
 		List<GuiTexture> guis = new ArrayList<GuiTexture>();
+		List<GuiText> texts = new ArrayList<GuiText>();
 		List<Light> lights = new ArrayList<Light>();
 		
 		//****** TERRAIN TEXTURE PACK ******\\
@@ -145,6 +150,25 @@ public class MainGameLoop {
 		
 		MousePicker picker = new MousePicker(renderer.getProjectionMatrix(), camera, terrain);
 		
+		Font font = new Font(loader.loadFontTexture("candara"), new File("res/fonts/candara.fnt"), new FontProperties(0.6F, 0.1F, 0.7F, 0.2F, new Vector2f(0, 0), new Vector3f(1, 1, 1)));
+		GuiText controls = new GuiText("Controls:", font, 2, new Vector2f(0.89F, 0.0F), 1F, false);
+//		controls.setFontColor(0.14F, 0.35F, 0.69F);
+		texts.add(controls);
+		
+		GuiText f3 = new GuiText("F3: First-person", font, 1.2F, new Vector2f(0.89F, 0.05F), 1F, false);
+		texts.add(f3);
+		
+		GuiText f2 = new GuiText("F2: Third-person", font, 1.2F, new Vector2f(0.89F, 0.08F), 1F, false);
+		texts.add(f2);
+		
+		Font fontProp = new Font(loader.loadFontTexture("candara"), new File("res/fonts/candara.fnt"), new FontProperties(0.5F, 0.1F, 0.5F, 0.5F, new Vector2f(0, 0), new Vector3f(1, 1, 1)));
+		GuiText text = new GuiText(DisplayManager.TITLE, fontProp, 1.5F, new Vector2f(0.01F, 0.02F), 1F, false);
+		text.setFontColor(0.57F, 0.19F, 0.64F);
+		texts.add(text);
+	
+		GuiTexture gui = new GuiTexture(loader.loadTexture("gui/health"), new Vector2f(-0.7F, -0.9F), new Vector2f(0.3F, 0.4F));
+		guis.add(gui);
+		
 		while(!Display.isCloseRequested()) {
 			player.move(terrain);
 			camera.move();
@@ -155,17 +179,18 @@ public class MainGameLoop {
 			float distance = 2 * (camera.getPosition().y - water.getHeight());
 			camera.getPosition().y -= distance;
 			camera.invertPitch();
-			renderer.render(terrains, entities, normalMapEntities, guis, lights, camera, new Vector4f(0, 1, 0, -water.getHeight() + 1));
+			renderer.render(terrains, entities, normalMapEntities, lights, camera, new Vector4f(0, 1, 0, -water.getHeight() + 1));
 			camera.getPosition().y += distance;
 			camera.invertPitch();
 			
 			buffers.bindRefractionFramebuffer();
-			renderer.render(terrains, entities, normalMapEntities, guis, lights, camera, new Vector4f(0, -1, 0, water.getHeight()));
+			renderer.render(terrains, entities, normalMapEntities, lights, camera, new Vector4f(0, -1, 0, water.getHeight()));
 			glDisable(GL_CLIP_DISTANCE0);
 			buffers.unbindCurrentFramebuffer();
 		
-			renderer.render(terrains, entities, normalMapEntities, guis, lights, camera, new Vector4f(0, -1, 0, 100000));
+			renderer.render(terrains, entities, normalMapEntities, lights, camera, new Vector4f(0, -1, 0, 100000));
 			renderer.postRender(waters, camera);
+			renderer.postRender(guis, texts);
 			DisplayManager.update();
 		}
 		buffers.clean();
